@@ -72,7 +72,7 @@ static void MX_TIM3_Init(void);
 
 TIM_HandleTypeDef htim3;
 
-ServoMotor_t valve_servo;
+ServoMotor_t petServo;
 
 int main(void)
 {
@@ -82,20 +82,20 @@ int main(void)
   MX_TIM3_Init();
 
   // Initialize the servo motor with 500–2500 µs pulse range
-  SERVO_Init(&valve_servo, &htim3, TIM_CHANNEL_1, 500, 2500);
+  SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
 
   while (1)
   {
     HAL_GPIO_TogglePin(GPIOE, LD3_Pin);
     HAL_Delay(30);
 
-    SERVO_SetAngle(&valve_servo, 90);   // Midpoint (open halfway)
+    SERVO_SetAngle(&petServo, 90);   // Midpoint (open halfway)
     HAL_Delay(500); 
 
-    SERVO_SetAngle(&valve_servo, 0);    // Closed
+    SERVO_SetAngle(&petServo, 0);    // Closed
     HAL_Delay(500);
 
-    SERVO_SetAngle(&valve_servo, 180);  // Fully open
+    SERVO_SetAngle(&petServo, 180);  // Fully open
     HAL_Delay(500);
 
   }
