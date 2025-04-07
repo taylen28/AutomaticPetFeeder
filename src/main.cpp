@@ -67,6 +67,8 @@ static void MX_TIM3_Init(void);
   #include "stm32f3xx_hal.h"
   #include "stm32f3xx_hal_tim.h"
   #include "servo.h"
+  #include "i2c.h"
+  #include "i2c-lcd.h"
   using namespace std;
 }
 
@@ -79,14 +81,53 @@ ServoMotor_t petServo;
 //dispense Food function using servoMotor
 void dispenseFood()
 {
-  SERVO_SetAngle(&petServo, 90);
-  HAL_Delay(1000);
-  SERVO_SetAngle(&petServo, 0);
+  lcd_clear();
+  lcd_put_cur(0, 0);
+  lcd_send_string("Dispensing...");
+
+  SERVO_SetAngle(&petServo, 90);  // Move servo
+  HAL_Delay(1000);                // Wait 1 sec
+  SERVO_SetAngle(&petServo, 0);   // Move servo back
+
+  lcd_clear();
+  lcd_put_cur(0, 0);
+  lcd_send_string("Idle...");
 
 }
 int main(void)
 {
-  // Initialize RTC manually
+  // HAL_Init();
+  // SystemClock_Config();
+  // MX_GPIO_Init();
+  // MX_TIM3_Init();
+  // MX_I2C1_Init();  
+  // lcd_init();         // initialize LCD
+  // lcd_clear();        // clear screen
+  //test
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_TIM3_Init();
+
+  SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
+
+
+  
+    
+    
+
+ 
+
+  lcd_put_cur(0, 0);  // move cursor to row 0, column 0
+  lcd_send_string("Feeder Ready!");
+
+
+  // Initialize the servo motor with 500–2500 µs pulse range
+ SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
+ HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+ HAL_Delay(500);
+
+   // Initialize RTC manually
 hrtc.Instance = RTC;
 hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
 hrtc.Init.AsynchPrediv = 127;
@@ -112,30 +153,27 @@ sDate.Month = RTC_MONTH_JANUARY;
 sDate.Date = 1;
 sDate.Year = 24;
 HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-
-
-  HAL_Init();
-  SystemClock_Config();
-  MX_GPIO_Init();
-  MX_TIM3_Init();
-
-  // Initialize the servo motor with 500–2500 µs pulse range
-  SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
-
+  
+  dispenseFood();
   while (1)
   {
     RTC_TimeTypeDef currentTime;
-    static uint8_t lastDispensedHour = 0;
+    // static uint8_t lastDispensedHour = 0;
     
     HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
     
     // Check if 3 hours passed
-    if ((currentTime.Hours - lastDispensedHour + 24) % 24 >= 3) {
-        dispenseFood();    // Your servo function
-        lastDispensedHour = currentTime.Hours;
-    }
+    // if ((currentTime.Hours - lastDispensedHour + 24) % 24 >= 3) {
+    //     dispenseFood();    // Your servo function
+    // //     lastDispensedHour = currentTime.Hours;
+    // // }
+    // dispenseFood();
     
-    HAL_Delay(1000);  // Small delay to slow down
+    // HAL_Delay(1000);  // Small delay to slow down
+    SERVO_SetAngle(&petServo, 90);
+    HAL_Delay(1000);
+    SERVO_SetAngle(&petServo, 0);
+    HAL_Delay(1000);
     
 
   }
