@@ -70,12 +70,50 @@ static void MX_TIM3_Init(void);
   using namespace std;
 }
 
+RTC_HandleTypeDef hrtc;
+
+
 TIM_HandleTypeDef htim3;
 
 ServoMotor_t petServo;
+//dispense Food function using servoMotor
+void dispenseFood()
+{
+  SERVO_SetAngle(&petServo, 90);
+  HAL_Delay(1000);
+  SERVO_SetAngle(&petServo, 0);
 
+}
 int main(void)
 {
+  // Initialize RTC manually
+hrtc.Instance = RTC;
+hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+hrtc.Init.AsynchPrediv = 127;
+hrtc.Init.SynchPrediv = 255;
+hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+if (HAL_RTC_Init(&hrtc) != HAL_OK)
+{
+    // Initialization Error
+    Error_Handler();
+} 
+
+// Set the initial time (only first time!)
+RTC_TimeTypeDef sTime = {0};
+RTC_DateTypeDef sDate = {0};
+
+sTime.Hours = 0;
+sTime.Minutes = 0;
+sTime.Seconds = 0;
+HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+
+sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+sDate.Month = RTC_MONTH_JANUARY;
+sDate.Date = 1;
+sDate.Year = 24;
+HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
@@ -86,17 +124,19 @@ int main(void)
 
   while (1)
   {
-    HAL_GPIO_TogglePin(GPIOE, LD3_Pin);
-    HAL_Delay(30);
-
-    SERVO_SetAngle(&petServo, 90);   // Midpoint (open halfway)
-    HAL_Delay(500); 
-
-    SERVO_SetAngle(&petServo, 0);    // Closed
-    HAL_Delay(500);
-
-    SERVO_SetAngle(&petServo, 180);  // Fully open
-    HAL_Delay(500);
+    RTC_TimeTypeDef currentTime;
+    static uint8_t lastDispensedHour = 0;
+    
+    HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
+    
+    // Check if 3 hours passed
+    if ((currentTime.Hours - lastDispensedHour + 24) % 24 >= 3) {
+        dispenseFood();    // Your servo function
+        lastDispensedHour = currentTime.Hours;
+    }
+    
+    HAL_Delay(1000);  // Small delay to slow down
+    
 
   }
   
