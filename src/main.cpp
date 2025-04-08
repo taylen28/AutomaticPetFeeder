@@ -68,7 +68,8 @@ static void MX_TIM3_Init(void);
   #include "stm32f3xx_hal_tim.h"
   #include "servo.h"
   #include "i2c.h"
-  #include "i2c-lcd.h"
+  // #include "i2c-lcd.h"
+  #include "lcd_parallel.h"
   using namespace std;
 }
 
@@ -85,100 +86,119 @@ void dispenseFood()
   lcd_put_cur(0, 0);
   lcd_send_string("Dispensing...");
 
-  SERVO_SetAngle(&petServo, 90);  // Move servo
-  HAL_Delay(1000);                // Wait 1 sec
-  SERVO_SetAngle(&petServo, 0);   // Move servo back
+  SERVO_SetAngle(&petServo, 90);  
+  HAL_Delay(1000);
+  SERVO_SetAngle(&petServo, 0);   
+  HAL_Delay(1000);
+  SERVO_SetAngle(&petServo, 180); 
+  HAL_Delay(1000);
 
   lcd_clear();
   lcd_put_cur(0, 0);
   lcd_send_string("Idle...");
-
 }
+// int main(void)
+// {
+//   HAL_Init();
+//   SystemClock_Config();
+//   MX_GPIO_Init();
+//   MX_TIM3_Init();
+//   // MX_I2C1_Init();  
+//   lcd_init();     
+  
+  
+//   // initialize LCD
+//   lcd_clear();        // clear screen
+//   lcd_put_cur(0, 0);  // move cursor to row 0, column 0
+//   lcd_send_string("Feeder Ready!");
+
+
+//   SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
+
+
+
+
+// //   // Initialize the servo motor with 500–2500 µs pulse range
+
+//  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+//  HAL_Delay(500);
+
+// //    // Initialize RTC manually
+// // hrtc.Instance = RTC;
+// // hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+// // hrtc.Init.AsynchPrediv = 127;
+// // hrtc.Init.SynchPrediv = 255;
+// // hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+// // if (HAL_RTC_Init(&hrtc) != HAL_OK)
+// // {
+// //     // Initialization Error
+// //     Error_Handler();
+// // } 
+
+// // // Set the initial time (only first time!)
+// // RTC_TimeTypeDef sTime = {0};
+// // RTC_DateTypeDef sDate = {0};
+
+// // sTime.Hours = 0;
+// // sTime.Minutes = 0;
+// // sTime.Seconds = 0;
+// // HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+
+// // sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+// // sDate.Month = RTC_MONTH_JANUARY;
+// // sDate.Date = 1;
+// // sDate.Year = 24;
+// // HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+  
+//   while (1)
+//   {
+    
+//    // dispenseFood();
+//     HAL_Delay(5000);
+
+//   }
+//   //test code
+//   // RTC_TimeTypeDef currentTime;
+//     // static uint8_t lastDispensedHour = 0;
+    
+//     // HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
+    
+//     // // Check if 3 hours passed
+//     // if ((currentTime.Hours - lastDispensedHour + 24) % 24 >= 3) {
+//     //     dispenseFood();    // Your servo function
+//     //     lastDispensedHour = currentTime.Hours;
+//     // }
+//     // HAL_Delay(1000);
+//     //
+// }
+
+
+
 int main(void)
 {
-  // HAL_Init();
-  // SystemClock_Config();
-  // MX_GPIO_Init();
-  // MX_TIM3_Init();
-  // MX_I2C1_Init();  
-  // lcd_init();         // initialize LCD
-  // lcd_clear();        // clear screen
-  //test
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
-  MX_TIM3_Init();
 
-  SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
+  HAL_Delay(2000);      
 
-
-  
-    
-    
-
- 
-
-  lcd_put_cur(0, 0);  // move cursor to row 0, column 0
-  lcd_send_string("Feeder Ready!");
-
-
-  // Initialize the servo motor with 500–2500 µs pulse range
- SERVO_Init(&petServo, &htim3, TIM_CHANNEL_1, 500, 2500);
- HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
- HAL_Delay(500);
-
-   // Initialize RTC manually
-hrtc.Instance = RTC;
-hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-hrtc.Init.AsynchPrediv = 127;
-hrtc.Init.SynchPrediv = 255;
-hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-if (HAL_RTC_Init(&hrtc) != HAL_OK)
-{
-    // Initialization Error
-    Error_Handler();
-} 
-
-// Set the initial time (only first time!)
-RTC_TimeTypeDef sTime = {0};
-RTC_DateTypeDef sDate = {0};
-
-sTime.Hours = 0;
-sTime.Minutes = 0;
-sTime.Seconds = 0;
-HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
-
-sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-sDate.Month = RTC_MONTH_JANUARY;
-sDate.Date = 1;
-sDate.Year = 24;
-HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-  
-  dispenseFood();
+  lcd_init();  
+  HAL_Delay(100);
   while (1)
   {
-    RTC_TimeTypeDef currentTime;
-    // static uint8_t lastDispensedHour = 0;
-    
-    HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
-    
-    // Check if 3 hours passed
-    // if ((currentTime.Hours - lastDispensedHour + 24) % 24 >= 3) {
-    //     dispenseFood();    // Your servo function
-    // //     lastDispensedHour = currentTime.Hours;
-    // // }
-    // dispenseFood();
-    
-    // HAL_Delay(1000);  // Small delay to slow down
-    SERVO_SetAngle(&petServo, 90);
-    HAL_Delay(1000);
-    SERVO_SetAngle(&petServo, 0);
-    HAL_Delay(1000);
-    
+    lcd_put_cur(0, 0);                    // move to row 0, column 0
+    lcd_send_string("FEEDER READY");      // write text
+    HAL_Delay(2000);                      // wait 2 sec
 
+    lcd_clear();                          // clear screen
+    HAL_Delay(500);  
   }
-  
 }
+
+
+
+
+
 
 
 /**
@@ -319,6 +339,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
   
+  /* LCD GPIO Init */
+GPIO_InitStruct.Pin = LCD_RS_Pin|LCD_E_Pin|LCD_D4_Pin|LCD_D5_Pin|LCD_D6_Pin|LCD_D7_Pin;
+GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+GPIO_InitStruct.Pull = GPIO_NOPULL;
+GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(LCD_GPIO_PORT, &GPIO_InitStruct);
+
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
